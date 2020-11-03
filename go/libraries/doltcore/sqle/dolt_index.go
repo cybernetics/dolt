@@ -27,7 +27,7 @@ import (
 )
 
 type DoltIndex interface {
-	sql.Index
+	sql.DriverIndex
 	sql.AscendIndex
 	sql.DescendIndex
 	Schema() schema.Schema
@@ -50,6 +50,11 @@ type doltIndex struct {
 
 //TODO: have queries using IS NULL make use of indexes
 var _ DoltIndex = (*doltIndex)(nil)
+
+// Driver returns the driver name that is only used in the sql.IndexDriverHarness.
+func (di *doltIndex) Driver() string {
+	return "DoltIndexDriver"
+}
 
 var alwaysContinueRangeCheck noms.InRangeCheck = func(tuple types.Tuple) (bool, error) {
 	return true, nil

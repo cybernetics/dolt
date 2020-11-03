@@ -42,6 +42,7 @@ var _ enginetest.SkippingHarness = (*DoltHarness)(nil)
 var _ enginetest.IndexHarness = (*DoltHarness)(nil)
 var _ enginetest.VersionedDBHarness = (*DoltHarness)(nil)
 var _ enginetest.ForeignKeyHarness = (*DoltHarness)(nil)
+var _ enginetest.IndexDriverHarness = (*DoltHarness)(nil)
 
 func newDoltHarness(t *testing.T) *DoltHarness {
 	session, err := sqle.NewDoltSession(context.Background(), enginetest.NewBaseSession(), "test", "email@test.com")
@@ -69,15 +70,7 @@ func (d *DoltHarness) SkipQueryTest(query string) bool {
 		lowerQuery == "show variables" || // we set extra variables
 		strings.Contains(lowerQuery, "show create table") || // we set extra comment info
 		strings.Contains(lowerQuery, "show indexes from") || // we create / expose extra indexes (for foreign keys)
-		strings.Contains(lowerQuery, "on duplicate key update") || // not working yet
-		query == `SELECT i FROM mytable mt 
-						 WHERE (SELECT i FROM mytable where i = mt.i and i > 2) IS NOT NULL
-						 AND (SELECT i2 FROM othertable where i2 = i) IS NOT NULL
-						 ORDER BY i` || // broken for unknown reasons
-		query == `SELECT i FROM mytable mt 
-						 WHERE (SELECT i FROM mytable where i = mt.i and i > 1) IS NOT NULL
-						 AND (SELECT i2 FROM othertable where i2 = i and i < 3) IS NOT NULL
-						 ORDER BY i` // broken for unknown reasons
+		strings.Contains(lowerQuery, "on duplicate key update") // not working yet
 }
 
 func (d *DoltHarness) Parallelism() int {
@@ -180,4 +173,8 @@ func (d *DoltHarness) SnapshotTable(db sql.VersionedDatabase, name string, asOf 
 	require.NoError(d.t, err)
 
 	return nil
+}
+
+func (d *DoltHarness) IndexDriver(dbs []sql.Database) sql.IndexDriver {
+	return NewIndexDriver(dbs)
 }

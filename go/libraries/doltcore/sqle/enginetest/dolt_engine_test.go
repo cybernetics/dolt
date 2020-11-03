@@ -32,14 +32,11 @@ func TestQueries(t *testing.T) {
 }
 
 func TestSingleQuery(t *testing.T) {
-	t.Skip()
+	//t.Skip()
 
 	var test enginetest.QueryTest
 	test = enginetest.QueryTest{
-		Query: `SELECT i FROM mytable mt 
-						 WHERE (SELECT i FROM mytable where i = mt.i and i > 2) IS NOT NULL
-						 AND (SELECT i2 FROM othertable where i2 = i) IS NOT NULL
-						 ORDER BY i`,
+		Query: `SELECT i FROM mytable mt WHERE (SELECT i FROM mytable where i = mt.i and i > 2)`,
 		Expected: []sql.Row{
 			{3},
 		},
